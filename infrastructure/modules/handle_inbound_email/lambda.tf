@@ -83,6 +83,11 @@ resource "aws_lambda_permission" "sns_to_lambda" {
 }
 
 // Allow lambda to log to cloudwatch
+resource "aws_cloudwatch_log_group" "lambda_log_to_cloudwatch" {
+  name              = "/aws/lambda/${aws_lambda_function.forward_inbound_email.function_name}"
+  retention_in_days = 30
+}
+
 resource "aws_iam_policy" "log_to_cloudwatch" {
   name        = "log_to_cloudwatch_${aws_lambda_function.forward_inbound_email.function_name}"
   path        = "/"
