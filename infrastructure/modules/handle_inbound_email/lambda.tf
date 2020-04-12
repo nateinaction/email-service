@@ -73,6 +73,15 @@ resource "aws_sns_topic_subscription" "inbound_email" {
   endpoint  = aws_lambda_function.forward_inbound_email.arn
 }
 
+// Allow the SNS to send messages to the lambda
+resource "aws_lambda_permission" "with_sns" {
+  statement_id  = "sns_to_lambda"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.forward_inbound_email.arn
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.inbound_email.arn
+}
+
 // Allow lambda to log to cloudwatch
 resource "aws_iam_policy" "log_to_cloudwatch" {
   name        = "log_to_cloudwatch_${aws_lambda_function.forward_inbound_email.function_name}"
@@ -84,7 +93,7 @@ resource "aws_iam_policy" "log_to_cloudwatch" {
 data "aws_iam_policy_document" "log_to_cloudwatch" {
   statement {
     actions   = ["logs:CreateLogGroup","logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["arn:aws:logs:*"]
+    resources = ["arn:aws:logs:*:*:*"]
   }
 }
 
