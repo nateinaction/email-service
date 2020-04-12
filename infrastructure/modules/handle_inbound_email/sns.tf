@@ -2,9 +2,9 @@
 resource "aws_sns_topic" "inbound_email" {
   name = "inbound_email_${replace(var.top_level_domain, ".", "_")}"
 
-  lambda_success_feedback_role_arn = aws_iam_role.sns_success_log_to_cloudwatch.arn
+  lambda_success_feedback_role_arn = aws_iam_role.sns_log_to_cloudwatch.arn
   lambda_success_feedback_sample_rate = 100
-  lambda_failure_feedback_role_arn = aws_iam_role.sns_failure_log_to_cloudwatch.arn
+  lambda_failure_feedback_role_arn = aws_iam_role.sns_log_to_cloudwatch.arn
 }
 
 // Allow the SNS topic to receive emails from SES
@@ -45,14 +45,8 @@ data "aws_iam_policy_document" "sns_assume_role" {
   }
 }
 
-resource "aws_iam_role" "sns_success_log_to_cloudwatch" {
-  name = "sns_success_${var.top_level_domain}"
-
-  assume_role_policy = data.aws_iam_policy_document.sns_assume_role.json
-}
-
-resource "aws_iam_role" "sns_failure_log_to_cloudwatch" {
-  name = "sns_failure_${var.top_level_domain}"
+resource "aws_iam_role" "sns_log_to_cloudwatch" {
+  name = "sns_to_cloudwatch_${var.top_level_domain}"
 
   assume_role_policy = data.aws_iam_policy_document.sns_assume_role.json
 }
@@ -79,12 +73,7 @@ resource "aws_iam_policy" "sns_log_to_cloudwatch" {
   policy = data.aws_iam_policy_document.sns_log_to_cloudwatch.json
 }
 
-resource "aws_iam_role_policy_attachment" "sns_success_log_to_cloudwatch" {
-  role       = aws_iam_role.sns_success_log_to_cloudwatch.name
-  policy_arn = aws_iam_policy.sns_log_to_cloudwatch.arn
-}
-
-resource "aws_iam_role_policy_attachment" "sns_failure_log_to_cloudwatch" {
-  role       = aws_iam_role.sns_failure_log_to_cloudwatch.name
+resource "aws_iam_role_policy_attachment" "sns_log_to_cloudwatch" {
+  role       = aws_iam_role.sns_log_to_cloudwatch.name
   policy_arn = aws_iam_policy.sns_log_to_cloudwatch.arn
 }

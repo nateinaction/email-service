@@ -74,7 +74,7 @@ resource "aws_sns_topic_subscription" "inbound_email" {
 }
 
 // Allow the SNS to send messages to the lambda
-resource "aws_lambda_permission" "with_sns" {
+resource "aws_lambda_permission" "sns_to_lambda" {
   statement_id  = "sns_to_lambda"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.forward_inbound_email.arn
