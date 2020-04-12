@@ -66,20 +66,13 @@ resource "aws_lambda_function" "forward_inbound_email" {
   }
 }
 
-// Subscribe the lambda to the inbound email topic
-resource "aws_sns_topic_subscription" "inbound_email" {
-  topic_arn = aws_sns_topic.inbound_email.arn
-  protocol  = "lambda"
-  endpoint  = aws_lambda_function.forward_inbound_email.arn
-}
-
-// Allow the SNS to send messages to the lambda
-resource "aws_lambda_permission" "sns_to_lambda" {
-  statement_id  = "sns_to_lambda"
+// Allow the S3 to send messages to the lambda
+resource "aws_lambda_permission" "allow_bucket" {
+  statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.forward_inbound_email.arn
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.inbound_email.arn
+  function_name = aws_lambda_function.forward_inbound_email.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.inbound_email_temporary_storage.arn
 }
 
 // Allow lambda to log to cloudwatch
